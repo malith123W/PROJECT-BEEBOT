@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "connect_wifi",
+			"path": "../../../Documents/PlatformIO/Projects/connect_wifi"
+		}
+	],
+	"settings": {}
+}

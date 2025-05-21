@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-cam = cv2.VideoCapture(0)
+cam = cv2.VideoCapture("http://192.168.137.177:4747/video")
 
 # Parameters for saving the video (optional)
 frameRate = 21
