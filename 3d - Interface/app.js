@@ -11,9 +11,12 @@ import {drawLable, createLable, show_BattStat} from "./screenLables.js"
 
 import arenaImg from "./resources/images/simbot_back-02.jpg";
 import lightMap from "./resources/images/simbot_back_lightmap-02.jpg";
-import botSTL from "./resources/3DModels/Cover.STL"
 
-import TWEEN from '@tweenjs/tween.js';
+
+import { Tween } from '@tweenjs/tween.js';
+
+const botSTL = new URL('./resources/3DModels/Cover.STL', import.meta.url).href;
+
 
 
 let scene, renderer, camera, root, controls, rayCaster, mouse, prevCameraPos;
@@ -120,7 +123,7 @@ function init() {
     addEventListeners()
 
     //camera intro anomation
-    animateCamera({ x: 40, y: 40, z: 40 }, 1000, TWEEN.Easing.Quintic.Out);
+    animateCamera({ x: 40, y: 40, z: 40 }, 1000, TWEEN.Tween.Easing.Quintic.Out);
 
     // start animating the GUI
     animate();
