@@ -2,6 +2,11 @@
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 
+const int redLED = 15;   // G15
+const int blueLED = 2;   // G2
+const int greenLED = 0;  // G0
+
+
 // Wi-Fi credentials
 const char* ssid = "ZTE Blade V50 Design";
 const char* password = "12345678malith";
@@ -170,6 +175,7 @@ void setup() {
   client.setCallback(mqttCallback);
   setupMotors();
   Serial.println("Motors initialized");
+  digitalWrite(redLED,HIGH);
 }
 
 void loop() {
