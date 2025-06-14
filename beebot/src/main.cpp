@@ -4,9 +4,9 @@
 #include <PID_v1.h>
 #include <Wire.h>
 
-const int redLED = 15;
-const int blueLED = 2;
-const int greenLED = 0;
+const int redLED = 4;
+const int blueLED = 16;
+const int greenLED = 17;
 
 // Motor pins
 const int pwmA = 32;
