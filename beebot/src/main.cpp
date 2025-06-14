@@ -413,52 +413,61 @@ void loop() {
       delay(1000);
       }  
     }
-  if (Serial.available() > 0)
-  {
+  
 
+  // Serial input for JSON commands
+  if (Serial.available() > 0) {
+    String jsonStr = Serial.readStringUntil('\n');
     dataDecoder(Serial.read()); // parsing the json string
     LED(0);
   }
 
-  // start turning process if the start angle is above the "turningThresh"
-  if ((-turningThresh > startAngle) || (turningThresh < startAngle))
-  {
+  if (newData) {
+    Serial.println("Executing new movement command...");
 
-    turn();
-    LED(0);
-  }
+    // Turn to start angle
+      // start turning process if the start angle is above the "turningThresh"
+      if ((-turningThresh > startAngle) || (turningThresh < startAngle))
+      {
 
-  // set the movingDone flag if the robo is at the destination
-  if (travelDis < distThresh)
-  {
+        turn();
+        LED(0);
+      }
 
-    movingDone = true;
-  }
-  else
-  {
+      // set the movingDone flag if the robo is at the destination
+      if (travelDis < distThresh)
+      {
 
-    movingDone = false;
-  }
+        movingDone = true;
+      }
+      else
+      {
 
-  if ((tcount < 40) && turningDone && newData && !movingDone) //run motors with PID if conditions are satisfied
-  {
-    Setpoint = 0; // set the gyro setpoint to 0
-    updateGyro();
-    Input = (double)angle;
-    myPID.Compute();
-    MoL(spd - Output);
-    MoR(spd + Output);
-  }
-  else
-  {
-    LED(0);
+        movingDone = false;
+      }
+
+      if ((tcount < 40) && turningDone && newData && !movingDone) //run motors with PID if conditions are satisfied
+      {
+        Setpoint = 0; // set the gyro setpoint to 0
+        updateGyro();
+        Input = (double)angle;
+        myPID.Compute();
+        MoL(spd - Output);
+        MoR(spd + Output);
+      }
+      else
+      {
+        LED(0);
+        newData = false;
+        MoL(0);
+        MoR(0);
+      }
+
+      tcount++;
+      delay(5);
+
     newData = false;
-    MoL(0);
-    MoR(0);
-  }
-
-  tcount++;
-  delay(5);
+    Serial.println("Movement command completed");
 
     // Send completion status
     String clientId = "esp32_" + String((uint32_t)ESP.getEfuseMac(), HEX);
@@ -470,6 +479,5 @@ void loop() {
     serializeJson(doc, statusMessage);
     client.publish(statusTopic.c_str(), statusMessage.c_str());
     Serial.println("Published status: " + statusMessage);
-    
+  }
 }
-
