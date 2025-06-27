@@ -1,0 +1,42 @@
+#include <Wire.h>
+#include <Arduino.h>
+
+const int MPU_addr = 0x68; // I2C address for MPU6500/MPU6050
+
+int16_t AccX, AccY, AccZ, Temp, GyroX, GyroY, GyroZ;
+
+void setup() {
+  Wire.begin(21, 22); // SDA = 21, SCL = 22 for ESP32
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x6B); // Power management register
+  Wire.write(0);    // Wake up the MPU6500
+  Wire.endTransmission(true);
+
+  Serial.begin(115200);
+  Serial.println("MPU6500 test started");
+}
+
+void loop() {
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x3B); // Starting register for Accel data
+  Wire.endTransmission(false);
+  Wire.requestFrom(MPU_addr, 14, true);
+
+  AccX = Wire.read() << 8 | Wire.read();
+  AccY = Wire.read() << 8 | Wire.read();
+  AccZ = Wire.read() << 8 | Wire.read();
+  Temp = Wire.read() << 8 | Wire.read();
+  GyroX = Wire.read() << 8 | Wire.read();
+  GyroY = Wire.read() << 8 | Wire.read();
+  GyroZ = Wire.read() << 8 | Wire.read();
+
+  Serial.print("AccX: "); Serial.print(AccX);
+  Serial.print(" | AccY: "); Serial.print(AccY);
+  Serial.print(" | AccZ: "); Serial.print(AccZ);
+  Serial.print(" | Temp: "); Serial.print(Temp / 340.00 + 36.53); // Celsius
+  Serial.print(" | GyroX: "); Serial.print(GyroX);
+  Serial.print(" | GyroY: "); Serial.print(GyroY);
+  Serial.print(" | GyroZ: "); Serial.println(GyroZ);
+
+  delay(2000);
+}
