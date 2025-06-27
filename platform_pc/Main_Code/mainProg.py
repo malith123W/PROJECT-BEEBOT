@@ -47,7 +47,7 @@ MQTT_PORT = 1883
 MQTT_KEEPALIVE = 60
 
 
-# region of intrest : {start_x, start_y, end_x, end_y}
+# region of intrest : {start_x, start_y, end_x, end_y}``
 ROI = config['ROI']
 
 # parameters for saving the video
