@@ -1,3 +1,17 @@
+# =====================
+# PLATFORM_PC SERVER SETUP INSTRUCTIONS
+#
+# 1. Install dependencies:
+#    pip install -r requirements.txt
+#
+# 2. Ensure your protobuf files are generated and available in this directory.
+#    (e.g., MQTT_msg_pb2.py)
+#
+# 3. This script connects to the public MQTT broker at test.mosquitto.org using TCP (port 1883).
+#    Your browser client (3D_Interface) should use wss://test.mosquitto.org:8081/mqtt.
+#    Both must use the same topic names for communication.
+# =====================
+
 import cv2
 import numpy as np
 import time
@@ -43,7 +57,7 @@ img_y = None
 
 # MQTT settings
 MQTT_BROKER = "test.mosquitto.org"
-MQTT_PORT = 1883
+MQTT_PORT = 1883  # Use TCP for Python client
 MQTT_KEEPALIVE = 60
 
 
@@ -56,7 +70,7 @@ dispWidth = 1280
 dispHeight = 720
 
 # Settings section
-serialComEn =  True
+serialComEn =  False
 ipCamEn = True
 kalmanEn = True
 flaskEn = True
