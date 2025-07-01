@@ -9,7 +9,7 @@ body {
     margin: 0;
     background: rgb(29, 29, 28);
     color:rgb(187, 212, 200);
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-family: 'Roboto', sans-serif;
 }
 
 .controls{
@@ -42,6 +42,7 @@ body {
     border-radius: 20px;
     background:rgb(3, 112, 107);
     transition-duration: 100ms;
+    font-family: 'Roboto', sans-serif;
 }
 
 .button:hover{
@@ -60,11 +61,15 @@ body {
     margin-right: 3vw;
     background: rgb(29, 29, 28);
     color:rgb(187, 212, 200);
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-family: 'Roboto', sans-serif;
     border: 1px solid rgb(117, 114, 114);
     border-radius: 10px;
 }
 
 .dropdown:hover{
     border: 2px solid rgb(151, 174, 187);
+}
+
+.roboto {
+    font-family: 'Roboto', sans-serif;
 }
