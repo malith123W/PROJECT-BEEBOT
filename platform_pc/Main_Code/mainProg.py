@@ -56,7 +56,7 @@ img_x = None
 img_y = None 
 
 # MQTT settings
-MQTT_BROKER = "test.mosquitto.org"
+MQTT_BROKER = "broker.mqttdashboard.com"
 MQTT_PORT = 1883  # Use TCP for Python client
 MQTT_KEEPALIVE = 60
 
@@ -70,7 +70,7 @@ dispWidth = 1280
 dispHeight = 720
 
 # Settings section
-serialComEn =  False
+serialComEn =  True
 ipCamEn = True
 kalmanEn = True
 flaskEn = True
@@ -86,7 +86,7 @@ comPort = 'COM6'
 
 # Camera settings
 IRIUN_CAMERA_INDEX = 0  # Usually 0 for the first virtual camera
-CAMERA_RESOLUTION = (1280, 960)  # Adjust based on your Iriun Webcam settings
+CAMERA_RESOLUTION = (1960, 1080)  # Adjust based on your Iriun Webcam settings
 
 # flags
 desReachedFlag = False
@@ -158,6 +158,8 @@ def on_message(client, userdata, message):
 
             if messageString[1] == 'ping':
                 client.publish(TOPIC_SEVER_COM, 'ping;')
+                print('client ping')
+
             
             if messageString[1] == 'battStat':
                 client.publish(TOPIC_SEVER_COM, 'battStat;' + battStat())
@@ -208,7 +210,7 @@ def destinationCalculation(robots, broadcastPos, frame, client, sharedData):
 
     for i, robot_i in enumerate(result):
         # calculate the direction
-        F = robot_i[0]*150000  # resultant force
+        F = robot_i[0]*300000  # resultant force
         # F = min(0.5, F)
         Dir = robot_i[1]  # relustant force direction
         dx = F*math.cos((Dir/180*math.pi))
@@ -229,8 +231,8 @@ def destinationCalculation(robots, broadcastPos, frame, client, sharedData):
         # prepare data to send through mqtt
         newBot = BotPosition()
         newBot.bot_id = i
-        newBot.x_cod = robots_data[i].init_pos[0]/(ROI['end_x']-ROI['start_x'])*30 
-        newBot.y_cod = robots_data[i].init_pos[1]/(ROI['end_x']-ROI['start_x'])*30
+        newBot.x_cod = (robots_data[i].init_pos[0]/(ROI['end_x']-ROI['start_x'])*30)-4
+        newBot.y_cod = (robots_data[i].init_pos[1]/(ROI['end_x']-ROI['start_x'])*30)+1
         newBot.angle = 0
         newBotPosArr.positions.append(newBot)
        
@@ -275,12 +277,16 @@ def camProcess(sharedData):
     desX = 0
     desY = 0
 
-    # Create MQTT client with protocol version 3.1.1
-    client = mqtt.Client()
+    # Create MQTT client with protocol version 3.1.1 and WebSocket transport
+    client = mqtt.Client(transport='websockets')
     client.on_message = on_message  # attach function to callback
 
+    # Set WebSocket options
+    client.ws_set_options(path="/mqtt")
+
     print("connecting to broker")
-    client.connect(broker_address, MQTT_PORT, MQTT_KEEPALIVE)  # connect to broker
+    # Use WebSocket port (commonly 8000)
+    client.connect(broker_address, 8000, MQTT_KEEPALIVE)  # connect to broker
     client.loop_start() 
 
     # subscribing to the current position topic

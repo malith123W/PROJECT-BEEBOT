@@ -31,11 +31,11 @@ def sendToSerial(sock, data):
 
 def serialAutoSend(sharedData):
     print("serialAutoSend")
-    interval = 0.25  # 250ms between sends
+    interval = 0.2  # 250ms between sends
     reconnect_delay = 5  # seconds between reconnect attempts
     hosts = {
-        '1': '192.168.192.79',  # ESP32 with ID=1
-       # '2': '192.168.1.102'   # ESP32 with ID=2
+        '1': '192.168.8.194',  # ESP32 with ID=1
+        '2': '192.168.8.114'   # ESP32 with ID=2
     }
     port = 8080
     
@@ -63,7 +63,7 @@ def serialAutoSend(sharedData):
                     print(f"Sending data to device {id}")
                     for id in sharedData[0]:  # If we have data for this ID
                         data = str(id) + ',' + ','.join(map(str, sharedData[0][id])) 
-                        #print("Network send:", data)
+                        # print("Network send:", data)
                         
                         try:
                             sock.sendall((data + "\n").encode())

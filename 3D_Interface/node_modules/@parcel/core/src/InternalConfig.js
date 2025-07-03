@@ -11,7 +11,7 @@ import type {ProjectPath} from './projectPath';
 
 import {fromProjectPathRelative} from './projectPath';
 import {createEnvironment} from './Environment';
-import {hashString} from '@parcel/hash';
+import {hashString} from '@parcel/rust';
 
 type ConfigOpts = {|
   plugin: PackageName,
@@ -20,6 +20,10 @@ type ConfigOpts = {|
   env?: Environment,
   result?: ConfigResult,
   invalidateOnFileChange?: Set<ProjectPath>,
+  invalidateOnConfigKeyChange?: Array<{|
+    filePath: ProjectPath,
+    configKey: string,
+  |}>,
   invalidateOnFileCreate?: Array<InternalFileCreateInvalidation>,
   invalidateOnEnvChange?: Set<string>,
   invalidateOnOptionChange?: Set<string>,
@@ -35,6 +39,7 @@ export function createConfig({
   env,
   result,
   invalidateOnFileChange,
+  invalidateOnConfigKeyChange,
   invalidateOnFileCreate,
   invalidateOnEnvChange,
   invalidateOnOptionChange,
@@ -56,6 +61,7 @@ export function createConfig({
     result: result ?? null,
     cacheKey: null,
     invalidateOnFileChange: invalidateOnFileChange ?? new Set(),
+    invalidateOnConfigKeyChange: invalidateOnConfigKeyChange ?? [],
     invalidateOnFileCreate: invalidateOnFileCreate ?? [],
     invalidateOnEnvChange: invalidateOnEnvChange ?? new Set(),
     invalidateOnOptionChange: invalidateOnOptionChange ?? new Set(),

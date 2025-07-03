@@ -31,10 +31,15 @@ export default async function loadPlugin<T>(
   version: Semver,
   resolveFrom: ProjectPath,
   range: ?SemverRange,
-|}> {
+|} | null> {
   let resolveFrom = configPath;
   let range;
-  if (resolveFrom.includes(NODE_MODULES)) {
+  let isOptional = false;
+  if (
+    resolveFrom.includes(NODE_MODULES) ||
+    (process.env.PARCEL_BUILD_ENV !== 'production' &&
+      /packages[/\\]configs/.test(resolveFrom))
+  ) {
     // Config packages can reference plugins, but cannot contain other plugins within them.
     // This forces every published plugin to be published separately so they can be mixed and matched if needed.
     if (pluginName.startsWith('.')) {
@@ -75,8 +80,11 @@ export default async function loadPlugin<T>(
       // If not in the config's dependencies, the plugin will be auto installed with
       // the version declared in "parcelDependencies".
       range = configPkg.config.parcelDependencies?.[pluginName];
+      isOptional =
+        Array.isArray(configPkg.config.optionalParcelDependencies) &&
+        configPkg.config.optionalParcelDependencies.includes(pluginName);
 
-      if (range == null) {
+      if (range == null && !isOptional) {
         let contents = await options.inputFS.readFile(
           configPkg.files[0].filePath,
           'utf8',
@@ -122,13 +130,17 @@ export default async function loadPlugin<T>(
       pluginName,
       resolveFrom,
       {
-        shouldAutoInstall: options.shouldAutoInstall,
+        shouldAutoInstall: options.shouldAutoInstall && !isOptional,
         range,
       },
     ));
   } catch (err) {
     if (err.code !== 'MODULE_NOT_FOUND') {
       throw err;
+    }
+
+    if (isOptional) {
+      return null;
     }
 
     let configContents = await options.inputFS.readFile(configPath, 'utf8');
@@ -165,47 +177,50 @@ export default async function loadPlugin<T>(
     });
   }
 
-  if (!pluginName.startsWith('.')) {
-    // Validate the engines.parcel field in the plugin's package.json
-    let parcelVersionRange = pkg && pkg.engines && pkg.engines.parcel;
-    if (!parcelVersionRange) {
-      logger.warn({
-        origin: '@parcel/core',
-        message: `The plugin "${pluginName}" needs to specify a \`package.json#engines.parcel\` field with the supported Parcel version range.`,
-      });
-    }
-
-    if (
-      parcelVersionRange &&
-      !semver.satisfies(PARCEL_VERSION, parcelVersionRange)
-    ) {
-      let pkgFile = nullthrows(
-        await resolveConfig(
-          options.inputFS,
-          resolved,
-          ['package.json'],
-          options.projectRoot,
-        ),
-      );
-      let pkgContents = await options.inputFS.readFile(pkgFile, 'utf8');
-      throw new ThrowableDiagnostic({
-        diagnostic: {
-          message: md`The plugin "${pluginName}" is not compatible with the current version of Parcel. Requires "${parcelVersionRange}" but the current version is "${PARCEL_VERSION}".`,
+  // Remove plugin version compatiblility validation in canary builds as they don't use semver
+  if (!process.env.SKIP_PLUGIN_COMPATIBILITY_CHECK) {
+    if (!pluginName.startsWith('.')) {
+      // Validate the engines.parcel field in the plugin's package.json
+      let parcelVersionRange = pkg && pkg.engines && pkg.engines.parcel;
+      if (!parcelVersionRange) {
+        logger.warn({
           origin: '@parcel/core',
-          codeFrames: [
-            {
-              filePath: pkgFile,
-              language: 'json5',
-              code: pkgContents,
-              codeHighlights: generateJSONCodeHighlights(pkgContents, [
-                {
-                  key: '/engines/parcel',
-                },
-              ]),
-            },
-          ],
-        },
-      });
+          message: `The plugin "${pluginName}" needs to specify a \`package.json#engines.parcel\` field with the supported Parcel version range.`,
+        });
+      }
+
+      if (
+        parcelVersionRange &&
+        !semver.satisfies(PARCEL_VERSION, parcelVersionRange)
+      ) {
+        let pkgFile = nullthrows(
+          await resolveConfig(
+            options.inputFS,
+            resolved,
+            ['package.json'],
+            options.projectRoot,
+          ),
+        );
+        let pkgContents = await options.inputFS.readFile(pkgFile, 'utf8');
+        throw new ThrowableDiagnostic({
+          diagnostic: {
+            message: md`The plugin "${pluginName}" is not compatible with the current version of Parcel. Requires "${parcelVersionRange}" but the current version is "${PARCEL_VERSION}".`,
+            origin: '@parcel/core',
+            codeFrames: [
+              {
+                filePath: pkgFile,
+                language: 'json5',
+                code: pkgContents,
+                codeHighlights: generateJSONCodeHighlights(pkgContents, [
+                  {
+                    key: '/engines/parcel',
+                  },
+                ]),
+              },
+            ],
+          },
+        });
+      }
     }
   }
 

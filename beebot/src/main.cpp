@@ -1,17 +1,15 @@
 #include <WiFi.h>
-#include <ArduinoJson.h>
 #include <PID_v1.h>
 #include <Wire.h>
-#include <esp_task_wdt.h>
+
 
 // Constants
 const int WIFI_TIMEOUT_MS = 10000;
-const int MQTT_TIMEOUT_MS = 5000;
-const int WATCHDOG_TIMEOUT_S = 10;
+
 const int MAX_MOTOR_SPEED = 150;
 const int MIN_MOTOR_SPEED = -150;
-double spd = -100;         // speed of the movements: [-255, 255]
-const int JSON_BUFFER_SIZE = 256;
+double spd = -120;         // speed of the movements: [-255, 255]
+
 
 const String RESPONSE_OK = "OK\r\n";
 const String RESPONSE_ERROR = "ERROR\r\n";
@@ -31,12 +29,12 @@ const int in4 = 14;
 const int stby = 26;
 
 // Wi-Fi credentials - should be moved to a separate config file
-const char* ssid = "ZTE Blade V50 Design";
-const char* password = "12345678malith";
+const char* ssid = "Dialog 4G 433";
+const char* password = "Fe9110EF";
 const int port = 8080; // Choose a port (e.g., 8080, 1234, etc.)
 
 
-// MQTT broker settings
+
 
 
 
@@ -47,8 +45,8 @@ String myID = "1";
 
 
 
-const float turningThresh = 0.25;
-const double distThresh = 20;
+const float turningThresh = 0.3;
+const double distThresh = 60;
 //const int MPU = 0x68;
 float GyroX, GyroY, GyroZ;
 float angle;
@@ -92,7 +90,7 @@ bool newData = false;
 String reciveStr = "";
 
 // PID configuration
-PID myPID(&Input, &Output, &Setpoint, 0.25, 0.003, 0.01, DIRECT);
+PID myPID(&Input, &Output, &Setpoint, 0.25, 0.003, 0.001, DIRECT);
 
 void dataDecoder(char c);
 void MoL(int val);
@@ -120,13 +118,9 @@ void setup() {
   Wire.begin(21, 22, 400000);
   Serial.println("BeeBot Starting...");
 
-  Serial.println("TCP Server started on port " + String(port));
-  Serial.println("Waiting for client connection...");
+ // Serial.println("TCP Server started on port " + String(port));
+ // Serial.println("Waiting for client connection...");
   
-  // Initialize watchdog timer
-  //esp_task_wdt_init(WATCHDOG_TIMEOUT_S, true);
-  //esp_task_wdt_add(NULL);
-
   if (!setup_wifi()) {
     Serial.println("Failed to connect to WiFi. Restarting...");
     ESP.restart();
@@ -156,9 +150,9 @@ void loop() {
   //esp_task_wdt_reset();
   
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("WiFi lost. Reconnecting...");
+   // Serial.println("WiFi lost. Reconnecting...");
     if (!setup_wifi()) {
-      Serial.println("Failed to reconnect to WiFi. Restarting...");
+      //Serial.println("Failed to reconnect to WiFi. Restarting...");
       ESP.restart();
     }
   }
@@ -167,7 +161,7 @@ void loop() {
   if (!client || !client.connected()) {
       client = server.available();
       if (client) {
-        Serial.println("New client connected!");
+        //Serial.println("New client connected!");
         client.setTimeout(100); // Set a reasonable timeout
       }
   }
@@ -198,41 +192,46 @@ void loop() {
       if ((-turningThresh > startAngle) || (turningThresh < startAngle))
       {
 
-        Serial.println(" start turning process");
+        //Serial.println(" start turning process");
         turn();
         LED(0);
       }
       else{
         turningDone = true;
-        Serial.println("  turning done");
+        //Serial.println("  turning done");
       }
 
       // set the movingDone flag if the robo is at the destination
       if (travelDis < distThresh)
       {
-        Serial.println(" set the movingDone");
+        //Serial.println(" set the movingDone");
         movingDone = true;
+        
+
       }
       else
       {
 
         movingDone = false;
-        Serial.println(" set the moving false");
+        //Serial.println(" set the moving false");
       }
 
-      if ((tcount < 40) && turningDone && newData && !movingDone) //run motors with PID if conditions are satisfied
+
+
+
+      if ((tcount < 50) && turningDone && newData && !movingDone) //run motors with PID if conditions are satisfied
       {
-        Serial.println(" update gyro");
+        //Serial.println(" update gyro");
         Setpoint = 0; // set the gyro setpoint to 0
         if (!updateGyro()) {
-          Serial.println("Error: Failed to update gyro");
+          //Serial.println("Error: Failed to update gyro");
           return;
         }
         Input = (double)angle;
         //Serial.println(String(Input) );
         myPID.Compute();
 
-        Serial.println(String(Output) );
+        //Serial.println(String(Output) );
         MoL(spd-Output);
         MoR(spd+Output);
       }
@@ -247,9 +246,7 @@ void loop() {
       tcount++;
       delay(5);
 
-    newData = false;
-    LED(7);
-    Serial.println("Movement command completed");
+   // Serial.println("Movement command completed");
 }
 }
 
@@ -258,7 +255,7 @@ void loop() {
 
 void MoL(int val) {
   if (val < MIN_MOTOR_SPEED || val > MAX_MOTOR_SPEED) {
-    Serial.println("Error: Invalid motor speed value");
+    //Serial.println("Error: Invalid motor speed value");
     return;
   }
   val = constrain(val, MIN_MOTOR_SPEED, MAX_MOTOR_SPEED);
@@ -273,7 +270,7 @@ void MoL(int val) {
 
 void MoR(int val) {
   if (val < MIN_MOTOR_SPEED || val > MAX_MOTOR_SPEED) {
-    Serial.println("Error: Invalid motor speed value");
+  //  Serial.println("Error: Invalid motor speed value");
     return;
   }
   val = constrain(val, MIN_MOTOR_SPEED, MAX_MOTOR_SPEED);
@@ -294,11 +291,11 @@ bool setup_wifi() {
     Serial.println("Connecting to WiFi...");
   }
   
-  Serial.println("Connected to WiFi!");
+ // Serial.println("Connected to WiFi!");
   Serial.print("ESP32 IP Address: ");
   Serial.println(WiFi.localIP()); // ← This is the IP you need
   
-  Serial.println("TCP Server started on port " + String(port));
+//  Serial.println("TCP Server started on port " + String(port));
   return true;
 }
 
@@ -316,9 +313,9 @@ void enableMotors() {
 
 
 
-void disableMotors() {
+/*void disableMotors() {
   digitalWrite(stby, LOW);
-}
+}*/
 
 
 
@@ -408,7 +405,7 @@ bool calculate_IMU_error() {
   }
   
   GyroErrorZ = sumErrorZ / samples;
-  printf("Gyro error Z: %.2f\n", GyroErrorZ);
+  //printf("Gyro error Z: %.2f\n", GyroErrorZ);
   return true;
 }
 
@@ -445,7 +442,7 @@ void intShow() {
 
 
 
-void pulse(int pulsetime, int time) {
+/*void pulse(int pulsetime, int time) {
   digitalWrite(in1, HIGH);
   digitalWrite(in2, LOW);
   digitalWrite(in3, HIGH);
@@ -460,7 +457,7 @@ void pulse(int pulsetime, int time) {
     delayMicroseconds(pulsetime * 9 / 10);
   }
 }
-
+*/
 
 int count = 0; //temp
 
@@ -509,31 +506,34 @@ void processCompleteMessage(String message) {
   // Check ID match
   if (receivedId == myID) {
     good = true;
-    
-    // Convert values to doubles
-    arr[0] = remainingData.substring(0, commaPos2).toDouble();
-    arr[1] = remainingData.substring(commaPos2 + 1, commaPos3).toDouble();
-    arr[2] = remainingData.substring(commaPos3 + 1).toDouble();
 
-    // Update global variables
-    startAngle = arr[0];
-    travelDis = arr[1];
-    endAngle = arr[2];
+    if(good){
     
-    // Send acknowledgment
-    client.print(RESPONSE_OK);
-    //Serial.printf("Device %s received: %.2f,%.2f,%.2f\n", myID.c_str(), startAngle, travelDis, endAngle);
-    
-    // Set flags for movement processing
-    newData = true;
-    tcount = 0;
-    turningDone = false;
-    movingDone = false;
+        // Convert values to doubles
+        arr[0] = remainingData.substring(0, commaPos2).toDouble();
+        arr[1] = remainingData.substring(commaPos2 + 1, commaPos3).toDouble();
+        arr[2] = remainingData.substring(commaPos3 + 1).toDouble();
+
+        // Update global variables
+        startAngle = arr[0];
+        travelDis = arr[1];
+        endAngle = arr[2];
+        
+        // Send acknowledgment
+        client.print(RESPONSE_OK);
+        //Serial.printf("Device %s received: %.2f,%.2f,%.2f\n", myID.c_str(), startAngle, travelDis, endAngle);
+        
+        // Set flags for movement processing
+        newData = true;
+        tcount = 0;
+        turningDone = false;
+        movingDone = false;
+        }
   }  else {
     // Message not for this device - send error response
     client.print(RESPONSE_ERROR);
-    Serial.printf("Message for ID %s received by device %s\n", 
-                 receivedId.c_str(), myID.c_str());
+   // Serial.printf("Message for ID %s received by device %s\n", 
+             //    receivedId.c_str(), myID.c_str());
   }
 }
 
@@ -547,7 +547,7 @@ void turn()
   //Setpoint =startAngle;
 
   prvstartAngle = startAngle; // update the prvstartAngle
-  Serial.println("started turning PID " + String(startAngle));
+  //Serial.println("started turning PID " + String(startAngle));
 
   while (!turningDone)
   {
@@ -569,20 +569,28 @@ void turn()
       prvstartAngle = startAngle;
     }
     if (!updateGyro()) {
-      Serial.println("Error: Failed to update gyro");
+      //Serial.println("Error: Failed to update gyro");
       return;
     }
     Input = (double)angle;
     myPID.Compute();
 
-    //Serial.println(String(startAngle) + ", " + String(Setpoint) + "," + String(Input) + ", " + String(Output) + ", ");
+    //Serial.println(String(star<tAngle) + ", " + String(Setpoint) + "," + String(Input) + ", " + String(Output) + ", ");
+   if (abs(Output)<15 && (Output >0))
+    {
+         Output =Output +10;
+    }
+    else if (abs(Output)<10 && (Output <0))
+    {
+          Output =Output -10;
+    }
 
     MoL(-Output);
     MoR(Output);
 
     if((-turningThresh < startAngle) && (turningThresh > startAngle)) // exit form the loop if the startAngle is bounded in threshold
     {
-      Serial.println("turning done");
+      //Serial.println("turning done");
       turningDone = true;
     }
     LED(2); //off
@@ -594,7 +602,7 @@ void turn()
 }
 
 
-
+/*
 void emergencyStop() {
   MoL(0);
   MoR(0);
@@ -608,7 +616,7 @@ void moveForward(int speed) {
 }
 
 
-
+*/
 void stopMotors() {
   MoL(0);
   MoR(0);

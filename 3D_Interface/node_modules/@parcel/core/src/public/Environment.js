@@ -25,11 +25,13 @@ export const BROWSER_ENVS: Set<string> = new Set<string>([
   'service-worker',
   'worklet',
   'electron-renderer',
+  'react-client',
 ]);
 const ELECTRON_ENVS = new Set(['electron-main', 'electron-renderer']);
-const NODE_ENVS = new Set(['node', ...ELECTRON_ENVS]);
+const NODE_ENVS = new Set(['node', 'react-server', ...ELECTRON_ENVS]);
 const WORKER_ENVS = new Set(['web-worker', 'service-worker']);
 export const ISOLATED_ENVS: Set<string> = new Set([...WORKER_ENVS, 'worklet']);
+const SERVER_ENVS = new Set(['node', 'react-server']);
 
 const ALL_BROWSERS = [
   'chrome',
@@ -81,6 +83,7 @@ const supportData = {
     samsung: '8',
     and_qq: '10.4',
     op_mob: '64',
+    node: '13.2.0',
   },
   'worker-module': {
     edge: '80',
@@ -105,6 +108,21 @@ const supportData = {
     samsung: '9.2',
     and_qq: '10.4',
     op_mob: '64',
+    node: '10.4.0',
+  },
+  'import-meta-resolve': {
+    edge: '105',
+    chrome: '105',
+    firefox: '106',
+    safari: '16.4',
+    opera: '91',
+    ios: '16.4',
+    android: '105',
+    and_chr: '105',
+    and_ff: '106',
+    op_mob: '72',
+    samsung: '20.0',
+    node: '20.8.0',
   },
   'arrow-functions': {
     chrome: '47',
@@ -123,6 +141,18 @@ const supportData = {
     and_chr: '50',
     and_qq: '12.12',
     op_mob: '64',
+  },
+  'global-this': {
+    chrome: '75',
+    edge: '79',
+    safari: '12.1',
+    firefox: '65',
+    opera: '58',
+    node: '12',
+    and_chr: '71',
+    ios: '12.2',
+    android: '71',
+    samsung: '10.1',
   },
 };
 
@@ -218,6 +248,10 @@ export default class Environment implements IEnvironment {
 
   isNode(): boolean {
     return NODE_ENVS.has(this.#environment.context);
+  }
+
+  isServer(): boolean {
+    return SERVER_ENVS.has(this.#environment.context);
   }
 
   isElectron(): boolean {

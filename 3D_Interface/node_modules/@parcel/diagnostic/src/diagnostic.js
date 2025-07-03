@@ -46,6 +46,12 @@ export type DiagnosticCodeFrame = {|
   codeHighlights: Array<DiagnosticCodeHighlight>,
 |};
 
+/** A JSON object (as in "map") */
+type JSONObject = {
+  // $FlowFixMe
+  [key: string]: any,
+};
+
 /**
  * A style agnostic way of emitting errors, warnings and info.
  * Reporters are responsible for rendering the message, codeframes, hints, ...
@@ -72,6 +78,9 @@ export type Diagnostic = {|
 
   /** A URL to documentation to learn more about the diagnostic. */
   documentationURL?: string,
+
+  /** Diagnostic specific metadata (optional) */
+  meta?: JSONObject,
 |};
 
 // This type should represent all error formats Parcel can encounter...
@@ -105,7 +114,7 @@ export type Diagnostifiable =
 /** Normalize the given value into a diagnostic. */
 export function anyToDiagnostic(input: Diagnostifiable): Array<Diagnostic> {
   if (Array.isArray(input)) {
-    return input;
+    return input.flatMap(e => anyToDiagnostic(e));
   } else if (input instanceof ThrowableDiagnostic) {
     return input.diagnostics;
   } else if (input instanceof Error) {

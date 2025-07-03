@@ -124,6 +124,3 @@ def getCoordinatesOfResultant(resultant, angelOfResultant):
     y_of_resultant = math.sqrt(r ** 2 - x_of_resultant ** 2)
 
     return x_of_resultant, y_of_resultant
-
-
-
