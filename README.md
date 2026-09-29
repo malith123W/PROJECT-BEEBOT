@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/images/banner.jpg" alt="Project Beebot" width="800"/>
+<img src="banner.jpg" alt="Project Beebot" width="800"/>
 
 # Project Beebot
 ### Autonomous Multi-Robot Swarm Navigation — No LiDAR, No IMU on the Field
@@ -22,7 +22,7 @@ Project Beebot is a cost-effective autonomous multi-robot navigation system for 
 
 | ArUco Detection & Tracking | Live 3D Interface |
 |:-:|:-:|
-| ![Detection GIF](docs/images/aruco_detection.gif) | ![3D Interface GIF](docs/images/3d_tracking.gif) |
+| ![Detection GIF](aruco_detection.gif) | ![3D Interface GIF](3d_tracking.gif) |
 
 </div>
 
@@ -102,27 +102,27 @@ Each BeeBot carries a custom control board built on a perf board:
 | Rev 1 — NodeMCU form factor | &nbsp; |
 |:-:|:-:|
 | Schematic | PCB layout |
-| <img src="docs/hardware/Beebot 1 Schematic.png" width="500"/> | <img src="docs/hardware/Beebot 1 PCB.png" width="330"/> |
+| <img src="Beebot 1 Schematic.png" width="500"/> | <img src="Beebot 1 PCB.png" width="330"/> |
 
 | Rev 2 — ESP32 DevKit V1 | &nbsp; |
 |:-:|:-:|
 | Schematic | PCB layout |
-| <img src="docs/hardware/Beebot 2 Schematic.png" width="500"/> | <img src="docs/hardware/Beebot 2 PCB.png" width="330"/> |
+| <img src="Beebot 2 Schematic.png" width="500"/> | <img src="Beebot 2 PCB.png" width="330"/> |
 
-<img src="docs/images/hardware_pcb.jpg" width="500"/>
+<img src="hardware_pcb.jpg" width="500"/>
 <br/><em>Assembled Rev 1 prototype on perf board</em>
 
 </div>
 
 ### ArUco Markers
 
-Print the files in `assets/markers/` at roughly **12 × 12 cm** and mount one on each robot's top face. The system uses the `DICT_6X6_250` ArUco dictionary.
+Print the files in `markers` at roughly **12 × 12 cm** and mount one on each robot's top face. The system uses the `DICT_6X6_250` ArUco dictionary.
 
 | File | Robot |
 |---|---|
-| `assets/markers/marker1.png` | Bot 0 |
-| `assets/markers/marker2.png` | Bot 1 |
-| `assets/markers/marker3.png` | Reference / destination |
+| `marker1.png` | Bot 0 |
+| `marker2.png` | Bot 1 |
+| `marker3.png` | Reference / destination |
 
 ---
 
@@ -133,7 +133,7 @@ Print the files in `assets/markers/` at roughly **12 × 12 cm** and mount one on
 A phone camera mounted above the arena (connected via Iriun Webcam) streams to the platform PC. OpenCV detects ArUco markers each frame, extracting centre point and heading from corner coordinates. A Kalman filter (`platform_pc/Main_Code/kalman.py`) smooths estimates when a marker is occluded.
 
 <div align="center">
-<img src="docs/images/aruco_detection_still.jpg" width="620"/>
+<img src="aruco_detection_still.jpg" width="620"/>
 <br/><em>Overhead view — green ROI boundary, yellow marker bounding boxes, heading arrows</em>
 </div>
 
@@ -164,12 +164,12 @@ Sent over TCP socket to the ESP32 on port **8080**. The robot replies `OK\r\n` o
 4. RGB LED reflects current state throughout
 
 <div align="center">
-<img src="docs/images/robots_leds.jpg" width="480"/>
+<img src="robots_leds.jpg" width="480"/>
 <br/><em>Two BeeBots navigating — RGB status LEDs visible</em>
 </div>
 
 <div align="center">
-<img src="docs/images/robot_navigation.gif" width="420"/>
+<img src="robot_navigation.gif" width="420"/>
 <br/><em>Autonomous navigation to assigned destinations</em>
 </div>
 
@@ -178,7 +178,7 @@ Sent over TCP socket to the ESP32 on port **8080**. The robot replies `OK\r\n` o
 After each camera frame the platform PC serialises robot positions as **Protocol Buffers** (`BotPositionArr`) and publishes to `swarm/0/bot_pos` on `test.mosquitto.org`. The 3D interface subscribes via WebSocket, deserialises, and animates STL robot models using TWEEN.js inside a Three.js scene.
 
 <div align="center">
-<img src="docs/images/3d_interface_still.jpg" width="680"/>
+<img src="3d_interface_still.jpg" width="680"/>
 <br/><em>3D interface — red cubes are robots, green diamonds are destinations, top-right shows "online"</em>
 </div>
 
@@ -351,7 +351,7 @@ Once the platform PC is running, the status badge in the top-right will turn **o
 | **Camera icons** | Reset view / top-down view |
 
 <div align="center">
-<img src="docs/images/3d_interface_running.jpg" width="680"/>
+<img src="3d_interface_running.jpg" width="680"/>
 </div>
 
 ---
